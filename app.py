@@ -40,10 +40,17 @@ def get_embedding(text):
     return response.data[0].embedding
 
 # البحث الدلالي
-def search_semantic(query, top_k=3):
+def search_semantic(query, top_k=5, threshold=0.35):
     query_vec = np.array(get_embedding(query)).astype("float32").reshape(1, -1)
     distances, indices = index.search(query_vec, top_k)
-    return df.iloc[indices[0]]
+
+    results = []
+    for i, dist in enumerate(distances[0]):
+        if dist < threshold:
+            match = df.iloc[indices[0][i]]
+            results.append((match, dist))
+
+    return results
 
 # تفسير العلاقة
 def explain_match(query, match_text):
